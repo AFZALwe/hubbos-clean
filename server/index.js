@@ -10,12 +10,20 @@ const PORT = process.env.PORT || 3000;
 console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
 console.log('JWT Secret:', process.env.JWT_SECRET ? 'Set' : 'Not set');
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hubbox', {
+const mongoOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
-})
+  connectTimeoutMS: 30000,
+  maxPoolSize: 10,
+  minPoolSize: 1,
+  maxIdleTimeMS: 30000,
+  retryWrites: true,
+  w: 'majority'
+};
+
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hubbox', mongoOptions)
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => {
   console.error('❌ MongoDB connection error:', err);

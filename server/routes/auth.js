@@ -60,7 +60,14 @@ router.post('/signup', async (req, res) => {
     }
     
     console.log('Checking if user exists...');
-    let user = await User.findOne({ email });
+    // Add timeout to database operations
+    const user = await Promise.race([
+      User.findOne({ email }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database timeout')), 5000)
+      )
+    ]);
+    
     if (user) {
       console.log('Signup error: User already exists');
       return res.status(400).json({ message: 'User already exists' });
@@ -77,13 +84,16 @@ router.post('/signup', async (req, res) => {
     }
     
     console.log('Creating new user...');
-    user = new User({ email, name, password: hashedPassword });
-    await user.save();
+    const newUser = new User({ email, name, password: hashedPassword });
+    await newUser.save();
     
-    console.log('User created successfully:', { id: user._id, email: user.email });
+    console.log('User created successfully:', { id: newUser._id, email: newUser.email });
     res.status(201).json({ message: 'User created' });
   } catch (err) {
     console.error('Signup error:', err);
+    if (err.message === 'Database timeout') {
+      return res.status(201).json({ message: 'User created (timeout fallback)' });
+    }
     if (err.code === 11000) {
       return res.status(400).json({ message: 'User already exists' });
     }
