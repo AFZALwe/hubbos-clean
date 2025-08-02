@@ -75,7 +75,12 @@ app.use(express.static(path.join(__dirname, '../client/build')));
 
 // Handle React routing, return all requests to React app
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  const indexPath = path.join(__dirname, '../client/build', 'index.html');
+  if (require('fs').existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.json({ message: 'Frontend not built. Please check build process.' });
+  }
 });
 
 // Server start
