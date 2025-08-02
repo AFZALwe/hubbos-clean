@@ -7,12 +7,20 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MongoDB Connection
+console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+console.log('JWT Secret:', process.env.JWT_SECRET ? 'Set' : 'Not set');
+
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hubbox', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
 })
 .then(() => console.log('✅ Connected to MongoDB'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+.catch(err => {
+  console.error('❌ MongoDB connection error:', err);
+  console.error('❌ MongoDB URI:', process.env.MONGODB_URI);
+});
 
 // Test MongoDB connection route
 app.get('/test-mongo', async (req, res) => {

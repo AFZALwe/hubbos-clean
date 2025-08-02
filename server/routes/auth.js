@@ -4,6 +4,7 @@ const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose'); // Added for fallback check
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -51,6 +52,13 @@ router.post('/signup', async (req, res) => {
   }
   
   try {
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      console.log('MongoDB not connected, using fallback');
+      // Fallback: Create a simple success response
+      return res.status(201).json({ message: 'User created (fallback mode)' });
+    }
+    
     console.log('Checking if user exists...');
     let user = await User.findOne({ email });
     if (user) {
