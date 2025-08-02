@@ -97,11 +97,13 @@ app.get('/video/:id', (req, res) => {
   }
 });
 
-// Serve React frontend
-app.use(express.static(path.join(__dirname, '../client/build')));
-
-// Handle React routing, return all requests to React app
+// Serve React frontend ONLY for non-API routes
 app.get('*', (req, res) => {
+  // Don't serve React for API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
+  
   const indexPath = path.join(__dirname, '../client/build', 'index.html');
   if (require('fs').existsSync(indexPath)) {
     res.sendFile(indexPath);
