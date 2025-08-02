@@ -59,7 +59,14 @@ router.post('/signup', async (req, res) => {
     }
     
     console.log('Hashing password...');
-    const hashedPassword = await bcrypt.hash(password, 10);
+    let hashedPassword;
+    try {
+      hashedPassword = await bcrypt.hash(password, 10);
+      console.log('Password hashed successfully');
+    } catch (hashError) {
+      console.error('Password hashing error:', hashError);
+      return res.status(500).json({ message: 'Password processing failed' });
+    }
     
     console.log('Creating new user...');
     user = new User({ email, name, password: hashedPassword });
@@ -69,6 +76,9 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({ message: 'User created' });
   } catch (err) {
     console.error('Signup error:', err);
+    if (err.code === 11000) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
     res.status(500).json({ message: 'Signup failed', error: err.message });
   }
 });
