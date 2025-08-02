@@ -14,6 +14,33 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/hubbox', 
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
+// Test MongoDB connection route
+app.get('/test-mongo', async (req, res) => {
+  try {
+    const connectionState = mongoose.connection.readyState;
+    console.log('MongoDB connection state:', connectionState);
+    
+    if (connectionState === 1) {
+      res.json({ 
+        status: 'Connected', 
+        message: 'MongoDB is connected',
+        env: process.env.MONGODB_URI ? 'Environment variable set' : 'No env variable'
+      });
+    } else {
+      res.json({ 
+        status: 'Not Connected', 
+        state: connectionState,
+        message: 'MongoDB is not connected'
+      });
+    }
+  } catch (error) {
+    res.json({ 
+      status: 'Error', 
+      error: error.message 
+    });
+  }
+});
+
 // Import routes
 const videoRoutes = require('./routes/video');
 const authRoutes = require('./routes/auth');
