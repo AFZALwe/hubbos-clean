@@ -26,12 +26,15 @@ export default function App() {
     setError('');
     setLoading(true);
     try {
+      console.log('Signup attempt:', { name: form.brand, email: form.email });
       const res = await fetch('https://hubboxbackend.onrender.com/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.brand, email: form.email, password: form.password }),
       });
+      console.log('Signup response status:', res.status);
       const data = await res.json();
+      console.log('Signup response data:', data);
       if (res.ok) {
         setIsLoginMode(true);
         setError('Signup successful! Please login.');
@@ -39,7 +42,8 @@ export default function App() {
         setError(data.message || 'Signup failed');
       }
     } catch (err) {
-      setError('Signup failed');
+      console.error('Signup error:', err);
+      setError('Signup failed - Network error');
     } finally {
       setLoading(false);
     }
@@ -49,12 +53,15 @@ export default function App() {
     setError('');
     setLoading(true);
     try {
+      console.log('Login attempt:', { email: form.email });
       const res = await fetch('https://hubboxbackend.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: form.email, password: form.password }),
       });
+      console.log('Login response status:', res.status);
       const data = await res.json();
+      console.log('Login response data:', data);
       if (res.ok && data.token) {
         localStorage.setItem('token', data.token);
         setIsLoggedIn(true);
@@ -62,7 +69,8 @@ export default function App() {
         setError(data.message || 'Login failed');
       }
     } catch (err) {
-      setError('Login failed');
+      console.error('Login error:', err);
+      setError('Login failed - Network error');
     } finally {
       setLoading(false);
     }

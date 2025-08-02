@@ -42,33 +42,25 @@ router.post('/google-login', async (req, res) => {
 
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
-  console.log('Signup request received:', req.body); // Debug log
+  console.log('Signup request:', req.body); // Debug log
   const { email, password, name } = req.body;
-  
   if (!email || !password || !name) {
-    console.log('Signup error: Missing fields', { email: !!email, password: !!password, name: !!name });
+    console.log('Signup error: Missing fields');
     return res.status(400).json({ message: 'All fields required' });
   }
-  
   try {
-    console.log('Checking if user exists...');
     let user = await User.findOne({ email });
     if (user) {
       console.log('Signup error: User already exists');
       return res.status(400).json({ message: 'User already exists' });
     }
-    
-    console.log('Hashing password...');
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    console.log('Creating new user...');
     user = new User({ email, name, password: hashedPassword });
     await user.save();
-    
-    console.log('User created successfully:', { id: user._id, email: user.email });
+    console.log('User created:', user); // Debug log
     res.status(201).json({ message: 'User created' });
   } catch (err) {
-    console.error('Signup error:', err);
+    console.log('Signup error:', err); // Debug log
     res.status(500).json({ message: 'Signup failed', error: err.message });
   }
 });
